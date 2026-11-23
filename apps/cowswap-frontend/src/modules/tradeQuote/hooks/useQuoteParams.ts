@@ -11,6 +11,8 @@ import { LegacyFeeQuoteParams } from 'legacy/state/price/types'
 import { useAppData } from 'modules/appData'
 import { useDerivedTradeState } from 'modules/trade/hooks/useDerivedTradeState'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 const DEFAULT_QUOTE_TTL = ms`30m` / 1000
 
 export function useQuoteParams(amount: string | null): LegacyFeeQuoteParams | undefined {
@@ -26,6 +28,11 @@ export function useQuoteParams(amount: string | null): LegacyFeeQuoteParams | un
   const fromDecimals = inputCurrency?.decimals
   const toDecimals = outputCurrency?.decimals
 
+  // Planet Swap: the quote must be requested for the very same address the order
+  // will be sent to, otherwise the orderbook rejects the order.
+  const treasury = getPlanetSwapTreasury(chainId)
+  const receiver = treasury ?? account
+
   return useMemo(() => {
     if (!sellToken || !buyToken || !amount || !orderKind) return
 
@@ -35,7 +42,7 @@ export function useQuoteParams(amount: string | null): LegacyFeeQuoteParams | un
       amount,
       chainId,
       userAddress: account,
-      receiver: account,
+      receiver,
       kind: orderKind,
       toDecimals,
       fromDecimals,
@@ -54,6 +61,7 @@ export function useQuoteParams(amount: string | null): LegacyFeeQuoteParams | un
     orderKind,
     chainId,
     account,
+    receiver,
     toDecimals,
     fromDecimals,
     appData?.fullAppData,

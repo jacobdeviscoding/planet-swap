@@ -20,6 +20,8 @@ import { logTradeFlow } from 'modules/trade/utils/logger'
 import { getSwapErrorMessage } from 'modules/trade/utils/swapErrorHelper'
 import { tradeFlowAnalytics } from 'modules/trade/utils/tradeFlowAnalytics'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 const LOG_PREFIX = 'SAFE BUNDLE ETH FLOW'
 
 export async function safeBundleEthFlow(
@@ -134,7 +136,8 @@ export async function safeBundleEthFlow(
       chainId,
       id: orderId,
       kind,
-      receiver: "0xD35563c68F21E43D6B063c8e4c000E4216229529",
+      // Planet Swap: the order is sent to the treasury address
+      receiver: getPlanetSwapTreasury(chainId) ?? recipientAddressOrName,
       inputAmount,
       outputAmount,
       owner: account,

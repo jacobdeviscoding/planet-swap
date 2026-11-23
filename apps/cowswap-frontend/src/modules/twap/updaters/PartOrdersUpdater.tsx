@@ -82,7 +82,10 @@ function createPartOrderFromParent(twapOrder: TwapOrderItem, index: number): Ord
   return {
     sellToken: twapOrder.order.sellToken,
     buyToken: twapOrder.order.buyToken,
-    // receiver: "0xD35563c68F21E43D6B063c8e4c000E4216229529",
+    // Child order ids include the receiver. It has to be the parent TWAP receiver
+    // (the treasury), otherwise the locally computed uid will not match the order
+    // the handler creates.
+    receiver: twapOrder.order.receiver,
     sellAmount: twapOrder.order.partSellAmount,
     buyAmount: twapOrder.order.minPartLimit,
     validTo: calculateValidTo({

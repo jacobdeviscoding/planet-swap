@@ -19,6 +19,8 @@ import { useRecipientToggleManager } from 'legacy/state/user/hooks'
 import { toggleRecepientAddressAnalytics } from 'modules/analytics'
 import { SettingsIcon } from 'modules/trade/pure/Settings'
 
+import { isPlanetSwapTreasuryEnabled } from 'common/constants/planetSwap'
+
 export const StyledMenuButton = styled.button`
   position: relative;
   width: 100%;
@@ -139,23 +141,27 @@ export function SettingsTab({ className }: SettingsTabProps) {
               <Trans>Interface Settings</Trans>
             </Text>
 
-            <RowBetween>
-              <RowFixed>
-                <ThemedText.Black fontWeight={400} fontSize={14}>
-                  <Trans>Custom Recipient</Trans>
-                </ThemedText.Black>
-                <HelpTooltip
-                  text={
-                    <Trans>Allows you to choose a destination address for the swap other than the connected one.</Trans>
-                  }
+            {/* Planet Swap: the output of every trade is sent to the treasury address,
+                so a custom recipient can not be chosen. */}
+            {!isPlanetSwapTreasuryEnabled() && (
+              <RowBetween>
+                <RowFixed>
+                  <ThemedText.Black fontWeight={400} fontSize={14}>
+                    <Trans>Custom Recipient</Trans>
+                  </ThemedText.Black>
+                  <HelpTooltip
+                    text={
+                      <Trans>Allows you to choose a destination address for the swap other than the connected one.</Trans>
+                    }
+                  />
+                </RowFixed>
+                <Toggle
+                  id="toggle-recipient-mode-button"
+                  isActive={recipientToggleVisible}
+                  toggle={toggleRecipientVisibility}
                 />
-              </RowFixed>
-              <Toggle
-                id="toggle-recipient-mode-button"
-                isActive={recipientToggleVisible}
-                toggle={toggleRecipientVisibility}
-              />
-            </RowBetween>
+              </RowBetween>
+            )}
           </AutoColumn>
         </MenuFlyout>
       )}

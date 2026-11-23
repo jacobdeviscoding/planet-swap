@@ -27,13 +27,21 @@ interface RecipientRowProps {
   chainId: SupportedChainId
   recipient: Nullish<string>
   account: Nullish<string>
+  /**
+   * Planet Swap: the address the tokens are actually sent to.
+   * When set, it takes precedence over the `recipient` prop.
+   */
+  treasury?: Nullish<string>
 }
 
 export function RecipientRow(props: RecipientRowProps) {
-  const { chainId, recipient, account } = props
+  const { chainId, recipient, account, treasury } = props
+  // Planet Swap: the output of the trade is sent to the treasury address
+  const targetAddress = treasury ?? recipient
+
   return (
     <>
-      {recipient && recipient.toLowerCase() !== account?.toLowerCase() && (
+      {targetAddress && targetAddress.toLowerCase() !== account?.toLowerCase() && (
         <Row>
           <div>
             <span>Recipient</span>{' '}
@@ -45,11 +53,11 @@ export function RecipientRow(props: RecipientRowProps) {
           </div>
           <div>
             <Link
-              title={recipient}
-              href={getExplorerLink(chainId, recipient, ExplorerDataType.ADDRESS)}
+              title={targetAddress}
+              href={getExplorerLink(chainId, targetAddress, ExplorerDataType.ADDRESS)}
               target="_blank"
             >
-              {isAddress(recipient) ? shortenAddress(recipient) : recipient}
+              {isAddress(targetAddress) ? shortenAddress(targetAddress) : targetAddress}
             </Link>
           </div>
         </Row>

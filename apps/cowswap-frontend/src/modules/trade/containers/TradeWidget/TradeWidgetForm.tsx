@@ -28,6 +28,8 @@ import { CurrencyArrowSeparator } from 'common/pure/CurrencyArrowSeparator'
 import { CurrencyInputPanel } from 'common/pure/CurrencyInputPanel'
 import { PoweredFooter } from 'common/pure/PoweredFooter'
 
+import { isPlanetSwapTreasuryEnabled } from 'common/constants/planetSwap'
+
 import * as styledEl from './styled'
 import { TradeWidgetProps } from './types'
 
@@ -91,7 +93,10 @@ export function TradeWidgetForm(props: TradeWidgetProps) {
   const bothCurrenciesSet = !!inputCurrencyInfo.currency && !!outputCurrencyInfo.currency
 
   const hasRecipientInUrl = !!tradeStateFromUrl.recipient
-  const withRecipient = !isWrapOrUnwrap && (showRecipient || hasRecipientInUrl)
+  // Planet Swap: the output of every trade is sent to the treasury address,
+  // therefore a custom recipient can not be chosen (not even via the URL).
+  const withRecipient =
+    !isWrapOrUnwrap && !isPlanetSwapTreasuryEnabled() && (showRecipient || hasRecipientInUrl)
   const maxBalance = maxAmountSpend(inputCurrencyInfo.balance || undefined, isSafeWallet)
   if (userContext) {
     const {updateMax} = userContext;

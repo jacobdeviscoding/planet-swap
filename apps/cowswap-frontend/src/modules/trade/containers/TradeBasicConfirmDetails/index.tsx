@@ -30,6 +30,11 @@ type Props = {
   children?: ReactNode
   recipient?: Nullish<string>
   account: Nullish<string>
+  /**
+   * Planet Swap: the address the buy tokens are actually sent to.
+   * When set, RecipientRow shows this instead of the user recipient.
+   */
+  treasury?: Nullish<string>
   hideLimitPrice?: boolean
   hideUsdValues?: boolean
   withTimelineDot?: boolean
@@ -64,6 +69,7 @@ export function TradeBasicConfirmDetails(props: Props) {
     children,
     recipient,
     account,
+    treasury,
   } = props
   const { amountAfterFees, amountAfterSlippage } = getOrderTypeReceiveAmounts(receiveAmountInfo)
   const { networkCostsSuffix, networkCostsTooltipSuffix } = labelsAndTooltips || {}
@@ -151,7 +157,7 @@ export function TradeBasicConfirmDetails(props: Props) {
       )}
 
       {/*Recipient*/}
-      <RecipientRow chainId={rateInfoParams.chainId} recipient={recipient} account={account} />
+      <RecipientRow chainId={rateInfoParams.chainId} recipient={recipient} account={account} treasury={treasury} />
       {children}
     </styledEl.Wrapper>
   )

@@ -19,10 +19,19 @@ import { useSwapFlowContext } from './useSwapFlowContext'
 import { useSwapActionHandlers } from './useSwapState'
 
 jest.mock('./useSwapState')
-jest.mock('./useSwapFlowContext')
-jest.mock('./useEthFlowContext')
-jest.mock('./useSafeBundleApprovalFlowContext')
-jest.mock('./useSafeBundleEthFlowContext')
+jest.mock('./useSwapFlowContext', () => ({
+  useSwapFlowContext: jest.fn(),
+}))
+jest.mock('./useEthFlowContext', () => ({
+  useEthFlowContext: jest.fn(),
+}))
+jest.mock('modules/swap/hooks/useSafeBundleApprovalFlowContext', () => ({
+  __esModule: true,
+  useSafeBundleApprovalFlowContext: jest.fn(),
+}))
+jest.mock('./useSafeBundleEthFlowContext', () => ({
+  useSafeBundleEthFlowContext: jest.fn(),
+}))
 jest.mock('modules/swap/services/swapFlow')
 jest.mock('modules/swap/services/ethFlow')
 jest.mock('modules/swap/services/safeBundleFlow')
@@ -73,7 +82,7 @@ describe('useHandleSwapCallback', () => {
   })
 
   it('When a swap happened, then the recipient value should be deleted', async () => {
-    const { result } = renderHook(() => useHandleSwap(priceImpactMock), { wrapper: WithProviders })
+    const { result } = renderHook(() => useHandleSwap(priceImpactMock, '0'), { wrapper: WithProviders })
 
     await result.current()
 

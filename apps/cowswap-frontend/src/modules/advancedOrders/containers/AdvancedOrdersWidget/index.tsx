@@ -15,6 +15,8 @@ import { TWAP_LEARN_MORE_LINK } from 'modules/twap/const'
 
 import { CurrencyInfo } from 'common/pure/CurrencyInputPanel/types'
 
+import { isPlanetSwapTreasuryEnabled } from 'common/constants/planetSwap'
+
 import { useUpdateAdvancedOrdersRawState } from '../../hooks/useAdvancedOrdersRawState'
 import { AdvancedOrdersSettings } from '../AdvancedOrdersSettings'
 
@@ -69,7 +71,10 @@ export function AdvancedOrdersWidget({
   } = useAdvancedOrdersDerivedState()
   const actions = useAdvancedOrdersActions()
   const { isLoading: isTradePriceUpdating } = useTradeQuote()
-  const { showRecipient } = useAtomValue(advancedOrdersSettingsAtom)
+  const { showRecipient: showRecipientSetting } = useAtomValue(advancedOrdersSettingsAtom)
+  // Planet Swap: the output of every trade is sent to the treasury address,
+  // therefore the user is not allowed to choose a custom recipient.
+  const showRecipient = isPlanetSwapTreasuryEnabled() ? false : showRecipientSetting
   const priceImpact = useTradePriceImpact()
   const receiveAmountInfo = useReceiveAmountInfo()
 

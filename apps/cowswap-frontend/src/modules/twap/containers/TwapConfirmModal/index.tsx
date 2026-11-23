@@ -14,6 +14,8 @@ import { PRICE_UPDATE_INTERVAL } from 'modules/tradeQuote/hooks/useTradeQuotePol
 import { useRateInfoParams } from 'common/hooks/useRateInfoParams'
 import { NetworkCostsSuffix } from 'common/pure/NetworkCostsSuffix'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { TwapConfirmDetails } from './TwapConfirmDetails'
 
 import { useCreateTwapOrder } from '../../hooks/useCreateTwapOrder'
@@ -55,7 +57,7 @@ const CONFIRM_MODAL_CONFIG = {
 }
 
 export function TwapConfirmModal() {
-  const { account } = useWalletInfo()
+  const { account, chainId } = useWalletInfo()
   const { ensName, allowsOffchainSigning } = useWalletDetails()
   const {
     inputCurrencyAmount,
@@ -78,6 +80,9 @@ export function TwapConfirmModal() {
   const widgetParams = useInjectedWidgetParams()
 
   const isInvertedState = useState(false)
+
+  // Planet Swap: the tokens are sent to the treasury address
+  const treasury = getPlanetSwapTreasury(chainId)
 
   const isConfirmDisabled = !!localFormValidation
 
@@ -131,6 +136,7 @@ export function TwapConfirmModal() {
               slippage={slippage}
               recipient={recipient}
               account={account}
+              treasury={treasury}
               labelsAndTooltips={{
                 ...CONFIRM_MODAL_CONFIG,
                 networkCostsSuffix: !allowsOffchainSigning ? <NetworkCostsSuffix /> : null,

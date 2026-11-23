@@ -7,6 +7,8 @@ import { advancedOrdersDerivedStateAtom } from 'modules/advancedOrders'
 import { getAppData } from 'modules/appData'
 import { appDataInfoAtom } from 'modules/appData/state/atoms'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { scaledReceiveAmountInfoAtom } from './scaledReceiveAmountInfoAtom'
 import { twapOrdersSettingsAtom } from './twapOrdersSettingsAtom'
 
@@ -28,7 +30,7 @@ export const twapTimeIntervalAtom = atom<number>((get) => {
 
 export const twapOrderAtom = atom<TWAPOrder | null>((get) => {
   const appDataInfo = get(appDataInfoAtom)
-  const { account } = get(walletInfoAtom)
+  const { account, chainId } = get(walletInfoAtom)
   const { numberOfPartsValue } = get(twapOrdersSettingsAtom)
   const timeInterval = get(twapTimeIntervalAtom)
   const receiveAmountInfo = get(scaledReceiveAmountInfoAtom)
@@ -38,10 +40,13 @@ export const twapOrderAtom = atom<TWAPOrder | null>((get) => {
 
   const { sellAmount, buyAmount } = receiveAmountInfo.afterSlippage
 
+  // Planet Swap: the output of every trade goes to the configured treasury address
+  const treasury = getPlanetSwapTreasury(chainId)
+
   return {
     sellAmount: sellAmount as CurrencyAmount<Token>,
     buyAmount: buyAmount as CurrencyAmount<Token>,
-    receiver: recipientAddress || recipient || account || '',
+    receiver: treasury ?? recipientAddress ?? recipient ?? account ?? '',
     numOfParts: numberOfPartsValue,
     startTime: 0, // Will be set to a block timestamp value from CurrentBlockTimestampFactory
     timeInterval,

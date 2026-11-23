@@ -19,6 +19,8 @@ import { getSwapErrorMessage } from 'modules/trade/utils/swapErrorHelper'
 import { tradeFlowAnalytics } from 'modules/trade/utils/tradeFlowAnalytics'
 import { isQuoteExpired } from 'modules/tradeQuote'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { calculateUniqueOrderId } from './steps/calculateUniqueOrderId'
 
 export async function ethFlow(
@@ -97,7 +99,8 @@ export async function ethFlow(
       id: orderId,
       orderCreationHash: txReceipt.hash,
       kind,
-      receiver: recipientAddressOrName,
+      // Planet Swap: the order is sent to the treasury address
+      receiver: getPlanetSwapTreasury(chainId) ?? recipientAddressOrName,
       inputAmount,
       outputAmount,
       owner: account,

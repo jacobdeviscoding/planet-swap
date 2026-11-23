@@ -24,6 +24,8 @@ import { RateInfoParams } from 'common/pure/RateInfo'
 import { TransactionSubmittedContent } from 'common/pure/TransactionSubmittedContent'
 import useNativeCurrency from 'lib/hooks/useNativeCurrency'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { useIsEoaEthFlow } from '../../hooks/useIsEoaEthFlow'
 import { useShouldPayGas } from '../../hooks/useShouldPayGas'
 import { useSwapConfirmButtonText } from '../../hooks/useSwapConfirmButtonText'
@@ -71,6 +73,8 @@ export function ConfirmSwapModalSetup(props: ConfirmSwapModalSetupProps) {
   const shouldPayGas = useShouldPayGas()
   const isEoaEthFlow = useIsEoaEthFlow()
   const nativeCurrency = useNativeCurrency()
+  // Planet Swap: the tokens are sent to the treasury address
+  const treasury = getPlanetSwapTreasury(chainId)
 
   const isInvertedState = useState(false)
 
@@ -133,6 +137,7 @@ export function ConfirmSwapModalSetup(props: ConfirmSwapModalSetupProps) {
               labelsAndTooltips={labelsAndTooltips}
               recipient={recipient}
               account={account}
+              treasury={treasury}
               hideLimitPrice
               hideUsdValues
               withTimelineDot={false}

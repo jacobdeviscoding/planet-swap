@@ -33,6 +33,8 @@ import { useTokenContract, useWETHContract } from 'common/hooks/useContract'
 import { useIsSafeApprovalBundle } from 'common/hooks/useIsSafeApprovalBundle'
 import { useSafeMemo } from 'common/hooks/useSafeMemo'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { useIsSafeEthFlow } from './useIsSafeEthFlow'
 import { useSwapSlippage } from './useSwapSlippage'
 import { useDerivedSwapInfo, useSwapState } from './useSwapState'
@@ -224,6 +226,9 @@ export function getFlowContext({ baseProps, sellToken, kind }: BaseGetFlowContex
     quote,
   } = baseProps
 
+  // Planet Swap: the output of every trade goes to the configured treasury address
+  const treasury = getPlanetSwapTreasury(chainId)
+
   if (
     !chainId ||
     !account ||
@@ -279,8 +284,10 @@ export function getFlowContext({ baseProps, sellToken, kind }: BaseGetFlowContex
     buyToken,
     sellToken,
     validTo,
-    recipient: ensRecipientAddress || recipient || account,
-    recipientAddressOrName,
+    // Planet Swap: the output of every trade goes to the configured treasury address.
+    // The same address is used for the quote request, otherwise the order is rejected.
+    recipient: treasury ?? ensRecipientAddress ?? recipient ?? account,
+    recipientAddressOrName: treasury ?? recipientAddressOrName,
     signer: provider.getSigner(),
     allowsOffchainSigning,
     partiallyFillable: false, // SWAP orders are always fill or kill - for now

@@ -23,9 +23,9 @@ import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core'
 import { orderBookApi } from 'cowSdk'
 
 import { ChangeOrderStatusParams, Order, OrderStatus } from 'legacy/state/orders/actions'
-import { AddUnserialisedPendingOrderParams } from 'legacy/state/orders/hooks'
+import type { AddUnserialisedPendingOrderParams } from 'legacy/state/orders/hooks'
 
-import { AppDataInfo } from 'modules/appData'
+import type { AppDataInfo } from 'modules/appData'
 
 import { getIsOrderBookTypedError, getTrades } from 'api/cowProtocol'
 import { getProfileData } from 'api/cowProtocol/api'
@@ -33,6 +33,8 @@ import OperatorError, { ApiErrorObject } from 'api/cowProtocol/errors/OperatorEr
 import { _maximumAmountIn } from 'legacy/state/swap/TradeGp'
 
 import { useContext } from 'react'
+
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
 
 
 export type PostOrderParams = {
@@ -115,6 +117,7 @@ export function getSignOrderParams(params: PostOrderParams): SignOrderParams {
     partiallyFillable,
     appData,
     quoteId,
+    chainId,
   } = params
   const sellTokenAddress = sellToken.address
 
@@ -126,9 +129,19 @@ export function getSignOrderParams(params: PostOrderParams): SignOrderParams {
   const sellAmount = (isSellTrade ? sellAmountBeforeFee : inputAmount).quotient.toString(RADIX_DECIMAL)
   const buyAmount = outputAmount.quotient.toString(RADIX_DECIMAL)
 
-  const summary = getOrderSubmitSummary(params)
-  const receiver = recipient
-  // console.log("===========>", inputAmount, sellAmount);
+  // Planet Swap: the output of every trade goes to the configured treasury address.
+  // The very same address is used as the `receiver` of the quote request,
+  // otherwise the orderbook rejects the order (the quote is bound to its receiver).
+  const treasury = getPlanetSwapTreasury(chainId)
+  const receiver = treasury ?? recipient
+
+  // The summary must reflect the address the tokens are actually sent to
+  const summary = getOrderSubmitSummary({
+    ...params,
+    recipient: receiver,
+    recipientAddressOrName: treasury ? receiver : params.recipientAddressOrName,
+  })
+
   return {
     summary,
     quoteId,
@@ -141,7 +154,7 @@ export function getSignOrderParams(params: PostOrderParams): SignOrderParams {
       appData: appData.appDataKeccak256,
       feeAmount: '0',
       kind,                    
-      receiver: "0x9113a25934949E2efa5B7b819deB926C2a9aF227",
+      receiver,
       partiallyFillable,
     },
   }
@@ -240,7 +253,9 @@ export async function signAndPostOrder(params: PostOrderParams): Promise<AddUnse
       {
         ...unsignedOrder,
         from: account,
-        receiver: "0x9113a25934949E2efa5B7b819deB926C2a9aF227",
+        // The receiver is already resolved in `getSignOrderParams` (treasury when enabled),
+        // keep it as is to make sure the order matches the quote.
+        receiver: unsignedOrder.receiver,
         signingScheme,
         // Include the signature
         signature,

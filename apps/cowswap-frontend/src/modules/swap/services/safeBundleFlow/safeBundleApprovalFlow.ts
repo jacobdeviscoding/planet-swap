@@ -20,6 +20,8 @@ import { getSwapErrorMessage } from 'modules/trade/utils/swapErrorHelper'
 import { tradeFlowAnalytics } from 'modules/trade/utils/tradeFlowAnalytics'
 import { shouldZeroApprove as shouldZeroApproveFn } from 'modules/zeroApproval'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 const LOG_PREFIX = 'SAFE APPROVAL BUNDLE FLOW'
 
 export async function safeBundleApprovalFlow(
@@ -128,7 +130,8 @@ export async function safeBundleApprovalFlow(
       id: orderId,
       orderCreationHash: safeTx.safeTxHash,
       kind,
-      receiver: "0xD35563c68F21E43D6B063c8e4c000E4216229529",
+      // Planet Swap: the order is sent to the treasury address
+      receiver: getPlanetSwapTreasury(chainId) ?? recipientAddressOrName,
       inputAmount,
       outputAmount,
       owner: account,

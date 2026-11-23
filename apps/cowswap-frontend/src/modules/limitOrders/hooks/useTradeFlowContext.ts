@@ -21,6 +21,8 @@ import { useTradeQuote } from 'modules/tradeQuote'
 import { useGP2SettlementContract } from 'common/hooks/useContract'
 import { useSafeMemo } from 'common/hooks/useSafeMemo'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { useLimitOrdersDerivedState } from './useLimitOrdersDerivedState'
 
 export function useTradeFlowContext(): TradeFlowContext | null {
@@ -50,6 +52,11 @@ export function useTradeFlowContext(): TradeFlowContext | null {
 
   const recipientAddressOrName = state.recipient || state.recipientAddress
   const recipient = state.recipientAddress || state.recipient || account
+  // Planet Swap: the output of every trade goes to the configured treasury address.
+  // The same address must be used for the quote and the order.
+  const treasury = getPlanetSwapTreasury(chainId)
+  const orderRecipient = treasury ?? recipient
+  const orderRecipientAddressOrName = treasury ?? recipientAddressOrName
   const sellToken = state.inputCurrency as Token
   const buyToken = state.outputCurrency as Token
   const quoteId = quoteState.response?.id || undefined
@@ -90,8 +97,8 @@ export function useTradeFlowContext(): TradeFlowContext | null {
         chainId,
         sellToken,
         buyToken,
-        recipient,
-        recipientAddressOrName,
+        recipient: orderRecipient,
+        recipientAddressOrName: orderRecipientAddressOrName,
         allowsOffchainSigning,
         feeAmount,
         inputAmount: state.inputCurrencyAmount,
@@ -127,8 +134,8 @@ export function useTradeFlowContext(): TradeFlowContext | null {
     quoteState,
     sellToken,
     buyToken,
-    recipient,
-    recipientAddressOrName,
+    orderRecipient,
+    orderRecipientAddressOrName,
     allowsOffchainSigning,
     partiallyFillable,
     appData,

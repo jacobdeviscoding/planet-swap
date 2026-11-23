@@ -21,6 +21,8 @@ import { useAppData } from 'modules/appData'
 import { useIsEoaEthFlow } from 'modules/swap/hooks/useIsEoaEthFlow'
 import { useDerivedSwapInfo, useSwapState } from 'modules/swap/hooks/useSwapState'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 export const TYPED_VALUE_DEBOUNCE_TIME = 350
 export const SWAP_QUOTE_CHECK_INTERVAL = ms`30s` // Every 30s
 const RENEW_FEE_QUOTES_BEFORE_EXPIRATION_TIME = ms`30s` // Will renew the quote if there's less than 30 seconds left for the quote to expire
@@ -122,7 +124,11 @@ export function FeesUpdater(): null {
   } = useDerivedSwapInfo()
 
   const { address: ensRecipientAddress } = useENSAddress(recipient)
-  const receiver = ensRecipientAddress || recipient
+  // Planet Swap: the output of every trade goes to the configured treasury address.
+  // The quote must use the same receiver the order will be sent to,
+  // otherwise the orderbook rejects the order (the quote is bound to its receiver).
+  const treasury = getPlanetSwapTreasury(chainId)
+  const receiver = treasury ?? ensRecipientAddress ?? recipient
   // Debounce the typed value to not refetch the fee too often
   // Fee API calculation/call
   const typedValue = useDebounce(rawTypedValue, TYPED_VALUE_DEBOUNCE_TIME)

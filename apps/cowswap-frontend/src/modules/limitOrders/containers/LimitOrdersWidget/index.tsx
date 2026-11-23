@@ -16,6 +16,8 @@ import { useSetTradeQuoteParams, useTradeQuote } from 'modules/tradeQuote'
 import { useRateInfoParams } from 'common/hooks/useRateInfoParams'
 import { CurrencyInfo } from 'common/pure/CurrencyInputPanel/types'
 
+import { isPlanetSwapTreasuryEnabled } from 'common/constants/planetSwap'
+
 import { LimitOrdersProps, limitOrdersPropsChecker } from './limitOrdersPropsChecker'
 import * as styledEl from './styled'
 
@@ -74,7 +76,9 @@ export function LimitOrdersWidget() {
   const widgetActions = useLimitOrdersWidgetActions()
 
   const { showRecipient: showRecipientSetting } = settingsState
-  const showRecipient = showRecipientSetting || !!recipient
+  // Planet Swap: the output of every trade is sent to the treasury address,
+  // therefore the user is not allowed to choose a custom recipient.
+  const showRecipient = isPlanetSwapTreasuryEnabled() ? false : showRecipientSetting || !!recipient
 
   const priceImpact = useTradePriceImpact()
   const quoteAmount = useMemo(

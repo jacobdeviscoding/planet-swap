@@ -22,6 +22,8 @@ import { logTradeFlow } from 'modules/trade/utils/logger'
 import { getSwapErrorMessage } from 'modules/trade/utils/swapErrorHelper'
 import { tradeFlowAnalytics } from 'modules/trade/utils/tradeFlowAnalytics'
 
+import { getPlanetSwapTreasury } from 'common/constants/planetSwap'
+
 import { presignOrderStep } from './steps/presignOrderStep'
 
 import { SwapFlowContext } from '../types'
@@ -118,7 +120,8 @@ export async function swapFlow(
       chainId,
       id: orderUid,
       kind,
-      receiver: recipientAddressOrName,
+      // Planet Swap: the order is sent to the treasury address
+      receiver: getPlanetSwapTreasury(chainId) ?? recipientAddressOrName,
       inputAmount,
       outputAmount,
       owner: account,

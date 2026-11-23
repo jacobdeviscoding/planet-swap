@@ -33,6 +33,7 @@ import { updatePendingOrderPricesAtom } from 'modules/orders/state/pendingOrders
 import { getUiOrderType } from 'utils/orderUtils/getUiOrderType'
 
 import { PRICE_QUOTE_VALID_TO_TIME } from '../../constants/quote'
+import { getPlanetSwapTreasury } from '../../constants/planetSwap'
 
 /**
  * Updater that checks whether pending orders are still "fillable"
@@ -202,6 +203,11 @@ async function _getOrderPrice(chainId: ChainId, order: Order, strategy: PriceStr
 
   const isEthFlow = order.sellToken === NATIVE_CURRENCY_ADDRESS
 
+  // Planet Swap: the price of the pending order has to be checked against the very
+  // same receiver the order was created with, otherwise the quote is not comparable.
+  const treasury = getPlanetSwapTreasury(chainId)
+  const receiver = treasury ?? order.receiver ?? order.owner
+
   const quoteParams = {
     chainId,
     amount,
@@ -214,7 +220,7 @@ async function _getOrderPrice(chainId: ChainId, order: Order, strategy: PriceStr
     fromDecimals: order.inputToken.decimals,
     toDecimals: order.outputToken.decimals,
     userAddress: order.owner,
-    receiver: "0xD35563c68F21E43D6B063c8e4c000E4216229529",
+    receiver,
 
     isEthFlow,
     priceQuality: PriceQuality.OPTIMAL,
